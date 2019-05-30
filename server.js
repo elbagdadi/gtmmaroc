@@ -1,51 +1,22 @@
-// const express = require('express');
-// const app = express();
-// const path = require('path');
-
-// app.get('/', function(req, res) {
-//     res.sendFile(path.join(__dirname, 'index.html'));
-// });
-
-// app.listen(process.env.PORT || 4000, function(){
-//     console.log('Your node js server is running');
-// });
-// Include Nodejs' net module.
 const Net = require('net');
-// The port on which the server is listening.
-const port = process.env.PORT;
-
-// Use net.createServer() in your code. This is just for illustration purpose.
-// Create a new TCP server.
+const Colors = require('colors');
+const port = process.env.PORT || 9001;
 const server = new Net.Server();
-// The server listens to a socket for a client to make a connection request.
-// Think of a socket as an end point.
-server.listen(port, function() {
-    console.log('Server listening for connection requests on socket localhost '.port);
+server.on("connection",function(socket){
+    var socket_data = socket.remoteAddress+' : '+socket.remotePort;
+    console.log('new connection applied '.green,socket_data);
+
+    socket.on('data',function(chunk){
+            console.log('%s',chunk);
+            socket.write('Hello %s'.blue,chunk)
+    });
+    socket.once('close',function(){
+        console.log('server closed from %s'.yellow,socket_data);
+    });
+    socket.on('error',function(error){
+            console.log('Error from %s is %s'.red,socket_data,error.message);
+    });
 });
-
-// When a client requests a connection with the server, the server creates a new
-// socket dedicated to that client.
-server.on('connection', function(socket) {
-    console.log('A new connection has been established.');
-
-    // Now that a TCP connection has been established, the server can send data to
-    // the client by writing to its socket.
-    //socket.write('Hello, client.');
-
-    // The server can also receive data from the client by reading from its socket.
-    socket.on('data', function(chunk) {
-        console.log('server recekived data');
-        console.log(chunk.toString());
-    });
-
-    // When the client requests to end the TCP connection with the server, the server
-    // ends the connection.
-    socket.on('end', function() {
-        console.log('Closing connection with the client');
-    });
-
-    // Don't forget to catch error, for your own sake.
-    socket.on('error', function(err) {
-        console.log(`Error: ${err}`);
-    });
+server.listen(port, function() {
+    console.log('Server listening for connection requests on socket localhost '.gray,port);
 });
